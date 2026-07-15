@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏠 中山綺麗費用管理</title>
+<style>
+:root {
+  --bg:           #f4f6fb;
+  --card:         #ffffff;
+  --border:       #e0e6ef;
+  --border-light: #eef1f7;
+  --text:         #1a2332;
+  --muted:        #6b7a95;
+  --muted-light:  #a0aec0;
+  --primary:      #1a56db;
+  --primary-dk:   #1040b0;
+  --primary-lt:   #e8f0fd;
+  --success:      #0e7c50;
+  --success-lt:   #e6f4ee;
+  --danger:       #c8192b;
+  --danger-lt:    #fdecea;
+  --warn:         #9a6007;
+  --warn-lt:      #fef8e7;
+  --bf:           #1a56db;
+  --bf-lt:        #e8f0fd;
+  --gf:           #c2185b;
+  --gf-lt:        #fce4ec;
+  --split:        #6d28d9;
+  --split-lt:     #ede9fe;
+  --shadow:       0 1px 4px rgba(30,50,90,.07);
+  --shadow-md:    0 3px 10px rgba(30,50,90,.10);
+  --radius:       10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:100px}
+
+/* ── Header ── */
+.header{background:var(--primary);color:#fff;padding:0 0 0}
+.header-main{max-width:800px;margin:0 auto;padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.header-title h1{font-size:1.25rem;font-weight:800;letter-spacing:-.3px}
+.header-title p{font-size:.8rem;opacity:.8;margin-top:3px}
+.settings-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .15s;flex-shrink:0}
+.settings-btn:hover{background:rgba(255,255,255,.3);transform:rotate(45deg)}
+.header-progress{max-width:800px;margin:0 auto;padding:0 20px 16px}
+.progress-labels{display:flex;justify-content:space-between;font-size:.72rem;color:rgba(255,255,255,.75);margin-bottom:5px}
+.progress-track{height:5px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:#fff;border-radius:3px;transition:width .8s ease}
+
+/* ── Wrapper ── */
+.wrap{max-width:800px;margin:0 auto;padding:0 16px}
+
+/* ── Cards ── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 16px 0}
+@media(min-width:500px){.stat-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.stat-card-label{font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.stat-card-val{font-size:1.2rem;font-weight:800;margin-top:5px;color:var(--text)}
+
+.person-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px 0}
+.person-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.pc-name{font-size:.88rem;font-weight:800;margin-bottom:10px}
+.pc-bf .pc-name{color:var(--bf)}
+.pc-gf .pc-name{color:var(--gf)}
+.pc-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0}
+.pc-row+.pc-row{border-top:1px solid var(--border-light)}
+.pc-row-label{font-size:.67rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.pc-row-val{font-size:.9rem;font-weight:700}
+.pc-row-val.cash-val{color:var(--success)}
+.pc-diff{margin-top:8px;padding:3px 8px;border-radius:5px;font-size:.68rem;font-weight:700;text-align:center}
+.pc-diff.over{background:var(--success-lt);color:var(--success)}
+.pc-diff.under{background:var(--warn-lt);color:var(--warn)}
+.pc-diff.even{background:var(--border);color:var(--muted)}
+
+/* ── Balance Banner ── */
+.balance-section{padding:10px 16px 0}
+.balance-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.balance-main{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.balance-icon{font-size:1.4rem;flex-shrink:0}
+.balance-info{flex:1;min-width:0}
+.balance-label{font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.balance-value{font-size:1.05rem;font-weight:700}
+.balance-settled{font-size:.75rem;color:var(--muted);margin-top:2px}
+.balance-value.settled{color:var(--success)}
+.balance-value.bf-owes{color:var(--gf)}
+.balance-value.gf-owes{color:var(--bf)}
+.add-payment-btn{flex-shrink:0;padding:7px 14px;border-radius:7px;border:1.5px solid var(--primary);background:var(--primary-lt);color:var(--primary);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.add-payment-btn:hover{background:var(--primary);color:#fff}
+
+/* Payment history list */
+.payment-list{border-top:1px solid var(--border-light)}
+.payment-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border-light)}
+.payment-item:last-child{border-bottom:none}
+.payment-icon{width:28px;height:28px;border-radius:50%;background:var(--success-lt);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.payment-desc{flex:1;min-width:0}
+.payment-who{font-size:.82rem;font-weight:600}
+.payment-meta{font-size:.7rem;color:var(--muted);margin-top:1px}
+.payment-amt{font-size:.88rem;font-weight:800;color:var(--success)}
+.payment-del{background:none;border:none;cursor:pointer;color:var(--muted-light);font-size:.9rem;padding:4px;border-radius:4px;transition:color .15s}
+.payment-del:hover{color:var(--danger)}
+
+/* ── Next Due ── */
+.next-due-section{padding:10px 16px 0}
+.section-label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.next-due-table{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.next-due-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background .1s}
+.next-due-row:last-child{border-bottom:none}
+.next-due-row:hover{background:var(--primary-lt)}
+.ndr-name{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ndr-date{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.ndr-status{padding:3px 9px;border-radius:5px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.ndr-status.upcoming{background:var(--primary-lt);color:var(--primary)}
+.ndr-status.overdue{background:var(--danger-lt);color:var(--danger)}
+
+/* ── Filters ── */
+.filter-wrap{padding:12px 16px 0}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filter-btn{padding:6px 14px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:.78rem;font-weight:600;white-space:nowrap;transition:all .15s;color:var(--muted)}
+.filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filter-btn:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+
+/* ── Groups ── */
+.groups-wrap{padding:12px 16px 0}
+.group{margin-bottom:18px;animation:fadeIn .2s ease}
+.group-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.group-title{font-size:.9rem;font-weight:800;display:flex;align-items:center;gap:5px}
+.group-meta{display:flex;align-items:center;gap:8px}
+.group-badge{font-size:.67rem;background:var(--border);padding:2px 8px;border-radius:4px;color:var(--muted);font-weight:700}
+.group-sum{font-size:.72rem;color:var(--muted);font-weight:600}
+.group-bar{height:3px;background:var(--border-light);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.group-bar-fill{height:100%;background:var(--success);border-radius:2px;transition:width .5s}
+
+/* Expense list */
+.exp-list{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.exp-item{display:grid;grid-template-columns:38px 1fr auto auto;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--border-light);transition:background .1s}
+.exp-item:last-child{border-bottom:none}
+.exp-item:hover{background:var(--primary-lt)}
+.exp-item.overdue-row{border-left:3px solid var(--danger)}
+
+.tog-btn{width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s;font-size:.9rem}
+.tog-btn:hover{transform:scale(1.12)}
+.tog-btn.paid{background:var(--success-lt);color:var(--success)}
+.tog-btn.pending{background:var(--border-light);color:var(--muted-light);border:2px dashed var(--border)}
+.tog-btn.overdue{background:var(--danger-lt);color:var(--danger);animation:pulse 1.8s infinite}
+
+.exp-info{cursor:pointer;min-width:0}
+.exp-name{font-size:.84rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-meta{display:flex;gap:5px;align-items:center;margin-top:2px;flex-wrap:wrap}
+.exp-date{font-size:.68rem;color:var(--muted)}
+.exp-note{font-size:.65rem;color:var(--muted);background:var(--border-light);padding:1px 5px;border-radius:3px}
+.exp-hint{font-size:.65rem;color:var(--muted);background:var(--border);padding:1px 5px;border-radius:3px}
+
+.resp-badge{font-size:.68rem;padding:3px 9px;border-radius:5px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:opacity .15s;white-space:nowrap}
+.resp-badge:hover{opacity:.7}
+.resp-badge.boyfriend {background:var(--bf-lt);   color:var(--bf);   border-color:#bfdbfe}
+.resp-badge.girlfriend{background:var(--gf-lt);   color:var(--gf);   border-color:#f9a8d4}
+.resp-badge.split     {background:var(--split-lt);color:var(--split);border-color:#c4b5fd}
+
+.exp-amt{font-weight:800;font-size:.86rem;text-align:right;min-width:66px;cursor:pointer}
+.exp-amt.paid   {color:var(--success)}
+.exp-amt.pending{color:var(--muted-light)}
+.exp-amt.overdue{color:var(--danger)}
+
+/* ── Action Bar ── */
+.action-bar{padding:0 16px;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.act-btn{flex:1;min-width:100px;padding:9px 12px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:.78rem;font-weight:600;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.act-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-lt)}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:26px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:1.7rem;cursor:pointer;box-shadow:0 4px 14px rgba(26,86,219,.4);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .15s,box-shadow .15s;line-height:1}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 18px rgba(26,86,219,.5)}
+.fab:active{transform:scale(.96)}
+
+/* ── Modals ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,40,.45);z-index:100;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+@media(min-width:580px){.modal-overlay{align-items:center;padding:20px}}
+.modal{background:var(--card);border-radius:16px 16px 0 0;padding:22px 18px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+@media(min-width:580px){.modal{border-radius:14px}}
+.modal-drag{width:32px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;display:block}
+.modal h2{font-size:1.05rem;font-weight:800;margin-bottom:18px}
+.sec-title{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+
+.fgrp{margin-bottom:12px}
+.flbl{font-size:.68rem;font-weight:700;color:var(--muted);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
+.finput,.fsel{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;outline:none;background:#fff;color:var(--text);transition:border-color .15s;font-family:inherit}
+.finput:focus,.fsel:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+
+.trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:12px}
+.trio-opt{padding:10px 5px;text-align:center;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:700;transition:all .15s;color:var(--muted);line-height:1.5;background:#fff}
+.trio-opt:hover{border-color:var(--primary);color:var(--primary)}
+.trio-opt.sel-bf   {border-color:var(--bf);   background:var(--bf-lt);   color:var(--bf)}
+.trio-opt.sel-gf   {border-color:var(--gf);   background:var(--gf-lt);   color:var(--gf)}
+.trio-opt.sel-split{border-color:var(--split);background:var(--split-lt);color:var(--split)}
+
+.paid-row{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--border-light);border-radius:8px;cursor:pointer;border:1.5px solid var(--border);transition:all .15s;margin-bottom:12px}
+.paid-row.on{border-color:var(--success);background:var(--success-lt)}
+.sw{width:38px;height:20px;border-radius:10px;background:var(--border);position:relative;flex-shrink:0;transition:background .2s}
+.sw::after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--success)}
+.sw.on::after{transform:translateX(18px)}
+.sw-lbl{font-weight:600;font-size:.85rem}
+
+.mactions{display:flex;gap:8px;margin-top:18px}
+.btn{padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
+.btn-primary  {background:var(--primary);color:#fff;flex:1}
+.btn-primary:hover{background:var(--primary-dk)}
+.btn-danger   {background:var(--danger-lt);color:var(--danger);border:1px solid #fca5a5}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-secondary{background:var(--border);color:var(--muted)}
+.btn-secondary:hover{background:#d1d9e6}
+
+/* Toast */
+.toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%) translateY(8px);background:#1a2332;color:#fff;padding:9px 20px;border-radius:10px;font-size:.82rem;font-weight:600;z-index:999;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.hidden{display:none!important}
+.empty-state{text-align:center;padding:36px 20px;color:var(--muted)}
+.empty-state .eicon{font-size:2.2rem;margin-bottom:10px}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-main">
+    <div class="header-title">
+      <h1>🏠 中山綺麗費用管理</h1>
+      <p id="headerSub">租約期間：2026年7月 — 2028年6月</p>
+    </div>
+    <span id="syncStatus" title="連線中..." style="font-size:.9rem;cursor:default">🔄</span>
+  <button class="settings-btn" onclick="openSettings()" title="設定 (,)">⚙️</button>
+  </div>
+  <div class="header-progress">
+    <div class="progress-labels">
+      <span id="pLabelStart">2026/7</span>
+      <span id="pLabelPct">0%</span>
+      <span id="pLabelEnd">2028/6</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</header>
+
+<!-- Stat Cards -->
+<div class="wrap">
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-card-label">✅ 已繳總額</div>
+      <div class="stat-card-val" id="totalPaid">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">⏳ 待繳總額</div>
+      <div class="stat-card-val" id="totalPending">-</div>
+    </div>
+  </div>
+  <div class="person-grid">
+    <div class="person-card pc-bf">
+      <div class="pc-name" id="bfCardName">👨 男友</div>
+      <div class="pc-row"><span class="pc-row-label">應付</span><span class="pc-row-val" id="bfShare">-</span></div>
+      <div class="pc-row"><span class="pc-row-label">已付</span><span class="pc-row-val cash-val" id="bfCash">-</span></div>
+      <div class="pc-diff" id="bfDiff">-</div>
+    </div>
+    <div class="person-card pc-gf">
+      <div class="pc-name" id="gfCardName">👩 女友</div>
+      <div class="pc-row"><span class="pc-row-label">應付</span><span class="pc-row-val" id="gfShare">-</span></div>
+      <div class="pc-row"><span class="pc-row-label">已付</span><span class="pc-row-val cash-val" id="gfCash">-</span></div>
+      <div class="pc-diff" id="gfDiff">-</div>
+    </div>
+  </div>
+</div>
+
+<!-- Balance + Payments -->
+<div class="balance-section wrap">
+  <div class="balance-card">
+    <div class="balance-main">
+      <span class="balance-icon" id="balanceIcon">⚖️</span>
+      <div class="balance-info">
+        <div class="balance-label">目前結餘</div>
+        <div class="balance-value" id="balanceValue">計算中...</div>
+        <div class="balance-settled hidden" id="settledInfo"></div>
+      </div>
+      <button class="add-payment-btn" onclick="openPaymentModal()">＋ 還款記錄</button>
+    </div>
+    <div class="payment-list hidden" id="paymentList"></div>
+  </div>
+</div>
+
+<!-- Next Due -->
+<div class="next-due-section wrap hidden" id="nextDueSection">
+  <div class="section-label">即將到期</div>
+  <div class="next-due-table" id="nextDueTable"></div>
+</div>
+
+<!-- Filters -->
+<div class="filter-wrap wrap">
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter(this,'all')">📋 全部</button>
+    <button class="filter-btn" onclick="setFilter(this,'一次性費用')">📦 一次性</button>
+    <button class="filter-btn" onclick="setFilter(this,'房租')">🏠 房租</button>
+    <button class="filter-btn" onclick="setFilter(this,'管理費')">🏢 管理費</button>
+    <button class="filter-btn" onclick="setFilter(this,'網路費')">🌐 網路費</button>
+    <button class="filter-btn" onclick="setFilter(this,'pending')">⏳ 待繳</button>
+    <button class="filter-btn" onclick="setFilter(this,'overdue')">🚨 逾期</button>
+    <button class="filter-btn" onclick="setFilter(this,'paid')">✅ 已繳</button>
+  </div>
+</div>
+
+<div class="groups-wrap wrap" id="groupsWrap"></div>
+
+<div class="action-bar wrap">
+  <button class="act-btn" onclick="exportData()">📤 匯出</button>
+  <button class="act-btn" onclick="document.getElementById('importInput').click()">📥 匯入</button>
+  <button class="act-btn" onclick="showModal('shareOverlay')">🔗 同步說明</button>
+  <input type="file" id="importInput" accept=".json" class="hidden" onchange="importData(event)">
+</div>
+
+<button class="fab" onclick="openAddModal()" title="新增費用 (N)">＋</button>
+<div class="toast" id="toast"></div>
+
+<!-- ── Expense Modal ── -->
+<div class="modal-overlay hidden" id="expenseOverlay" onclick="overlayClose(event,'expenseOverlay')">
+  <div class="modal">
+    <span class="modal-drag"></span>
+    <h2 id="modalTitle">新增費用</h2>
+    <div class="fgrp">
+      <label class="flbl">費用名稱 *</label>
+      <input type="text" class="finput" id="inp-name" placeholder="例：管理費 2026年8月">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fgrp"><label class="flbl">金額 (NTD) *</label><input type="number" class="finput" id="inp-amount" placeholder="0" min="0"></div>
+      <div class="fgrp"><label class="flbl">繳費日期</label><input type="date" class="finput" id="inp-date"></div>
+    </div>
+    <div class="fgrp">
+      <label class="flbl">類別</label>
+      <select class="fsel" id="inp-category">
+        <option value="一次性費用">📦 一次性費用</option>
+        <option value="房租">🏠 房租</option>
+        <option value="管理費">🏢 管理費</option>
+        <option value="網路費">🌐 網路費</option>
+        <option value="其他">📝 其他</option>
+      </select>
+    </div>
+    <div class="sec-title">💰 費用責任（誰的費用）</div>
+    <p style="font-size:.74rem;color:var(--muted);margin-bottom:9px;line-height:1.6">「某人出」= 該方100%負責，另一方不需出錢。</p>
+    <div class="trio">
+      <div class="trio-opt" id="opt-resp-bf"    onclick="selResp('boyfriend')">👨<br><span id="resp-bf-lbl">男友出</span></div>
+      <div class="trio-opt" id="opt-resp-gf"    onclick="selResp('girlfriend')">👩<br><span id="resp-gf-lbl">女友出</span></div>
+      <div class="trio-opt" id="opt-resp-split" onclick="selResp('split')">🤝<br>均分</div>
+    </div>
+    <div class="sec-title">💳 誰實際付錢</div>
+    <div class="trio">
+      <div class="trio-opt" id="opt-paid-bf"    onclick="selPayer('boyfriend')">👨<br><span id="paid-bf-lbl">男友付</span></div>
+      <div class="trio-opt" id="opt-paid-gf"    onclick="selPayer('girlfriend')">👩<br><span id="paid-gf-lbl">女友付</span></div>
+      <div class="trio-opt" id="opt-paid-split" onclick="selPayer('split')">🤝<br>各付各的</div>
+    </div>
+    <div class="sec-title">📋 繳費狀態</div>
+    <div class="paid-row" id="paidRow" onclick="togglePaid()">
+      <div class="sw" id="paidSw"></div>
+      <span class="sw-lbl" id="paidLbl">尚未繳費</span>
+    </div>
+    <div class="fgrp"><label class="flbl">備註（選填）</label><input type="text" class="finput" id="inp-note" placeholder="例：每月1號繳"></div>
+    <div class="mactions">
+      <button class="btn btn-secondary" onclick="hideModal('expenseOverlay')">取消</button>
+      <button class="btn btn-danger hidden" id="deleteBtn" onclick="confirmDelete()">🗑 刪除</button>
+      <button class="btn btn-primary" onclick="saveExpense()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Payment Modal ── -->
+<div class="modal-overlay hidden" id="paymentOverlay" onclick="overlayClose(event,'paymentOverlay')">
+  <div class="modal">
+    <span class="modal-drag"></span>
+    <h2>💰 新增還款記錄</h2>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:14px;line-height:1.7" id="paymentHint">記錄誰今天還了多少錢。</p>
+    <div class="sec-title">誰付給誰</div>
+    <div class="trio" id="paymentDirectionTrio">
+      <div class="trio-opt" id="opt-pay-gftobf" onclick="selPayDir('gftobf')">👩<br><span id="payDir-gftobf">女友→男友</span></div>
+      <div class="trio-opt" id="opt-pay-bftogf" onclick="selPayDir('bftogf')">👨<br><span id="payDir-bftogf">男友→女友</span></div>
+      <div class="trio-opt" id="opt-pay-even"   onclick="selPayDir('even')">🤝<br>已結清</div>
+    </div>
+    <div class="fgrp"><label class="flbl">金額 (NTD)</label><input type="number" class="finput" id="pay-amount" placeholder="0" min="0"></div>
+    <div class="fgrp"><label class="flbl">日期</label><input type="date" class="finput" id="pay-date"></div>
+    <div class="fgrp"><label class="flbl">備註（選填）</label><input type="text" class="finput" id="pay-note" placeholder="例：LINE 轉帳"></div>
+    <div class="mactions">
+      <button class="btn btn-secondary" onclick="hideModal('paymentOverlay')">取消</button>
+      <button class="btn btn-primary" onclick="savePayment()">新增記錄</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Modal ── -->
+<div class="modal-overlay hidden" id="settingsOverlay" onclick="overlayClose(event,'settingsOverlay')">
+  <div class="modal">
+    <span class="modal-drag"></span>
+    <h2>⚙️ 設定</h2>
+    <div class="sec-title">📅 租約期間</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fgrp"><label class="flbl">開始日期</label><input type="date" class="finput" id="set-start"></div>
+      <div class="fgrp"><label class="flbl">結束日期</label><input type="date" class="finput" id="set-end"></div>
+    </div>
+    <div class="sec-title">👤 自訂名稱</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fgrp"><label class="flbl">👨 男方名稱</label><input type="text" class="finput" id="set-bf" placeholder="男友" maxlength="10"></div>
+      <div class="fgrp"><label class="flbl">👩 女方名稱</label><input type="text" class="finput" id="set-gf" placeholder="女友" maxlength="10"></div>
+    </div>
+    <div class="mactions">
+      <button class="btn btn-secondary" onclick="hideModal('settingsOverlay')">取消</button>
+      <button class="btn btn-primary" onclick="saveSettings()">儲存設定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Share Modal ── -->
+<div class="modal-overlay hidden" id="shareOverlay" onclick="overlayClose(event,'shareOverlay')">
+  <div class="modal">
+    <span class="modal-drag"></span>
+    <h2>🔗 如何與另一半同步？</h2>
+    <div style="background:var(--border-light);border-radius:9px;padding:13px;margin-bottom:10px">
+      <div style="font-weight:700;font-size:.85rem;margin-bottom:5px">方式一：匯出 / 匯入（手動同步）</div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.8">1. 點「📤 匯出」下載 JSON 檔<br>2. 透過 LINE 傳給對方<br>3. 對方點「📥 匯入」載入</div>
+    </div>
+    <div style="background:var(--border-light);border-radius:9px;padding:13px;margin-bottom:18px">
+      <div style="font-weight:700;font-size:.85rem;margin-bottom:5px">方式二：iCloud Drive 共享</div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.8">將 index.html 放在共享的 iCloud Drive 資料夾，兩人各自開啟即可。</div>
+    </div>
+    <button class="btn btn-primary" onclick="hideModal('shareOverlay')" style="width:100%">了解了</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+'use strict';
+
+// ─── Firebase ─────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey:            "AIzaSyBEY31f8IzZPghhvDepM0L4FOwfJXp_2KA",
+  authDomain:        "rental-tracker-99592.firebaseapp.com",
+  projectId:         "rental-tracker-99592",
+  storageBucket:     "rental-tracker-99592.firebasestorage.app",
+  messagingSenderId: "234403898985",
+  appId:             "1:234403898985:web:1f2154554adc07e29464f8"
+});
+const DB       = firebase.firestore();
+const DATA_REF = DB.collection('rental').doc('main');
+
+function setSyncStatus(state) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  const map = { syncing:['🔄','同步中...'], ok:['🟢','已同步'], error:['🔴','離線（本機資料）'] };
+  [el.textContent, el.title] = map[state] || map.syncing;
+}
+
+function syncToCloud() {
+  setSyncStatus('syncing');
+  DATA_REF.set({ expenses: EX, payments: PAY, settings: S })
+    .then(() => setSyncStatus('ok'))
+    .catch(err => { console.error(err); setSyncStatus('error'); });
+}
+
+function startListener() {
+  setSyncStatus('syncing');
+  DATA_REF.onSnapshot(snap => {
+    if (snap.exists) {
+      const d = snap.data();
+      EX  = d.expenses  || [];
+      PAY = d.payments  || [];
+      if (d.settings) S = { ...S, ...d.settings };
+      EX.forEach(e => { if (!e.responsibility) e.responsibility = e.paidBy || 'split'; });
+      setSyncStatus('ok');
+    } else {
+      // 首次啟動：寫入預設資料
+      EX  = buildDefault();
+      PAY = [];
+      syncToCloud();
+    }
+    render();
+  }, err => {
+    console.error('Firestore:', err);
+    setSyncStatus('error');
+    loadEx(); loadPay(); render(); // 降級用本機
+  });
+}
+
+// ─── Settings ─────────────────────────────────────────────
+let S = { leaseStart:'2026-07-01', leaseEnd:'2028-06-30', bfName:'男友', gfName:'女友' };
+const BF = () => S.bfName || '男友';
+const GF = () => S.gfName || '女友';
+
+function loadS() {
+  try { const r=localStorage.getItem('rz-settings-v1'); if(r) S={...S,...JSON.parse(r)}; } catch{}
+}
+function openSettings() {
+  document.getElementById('set-start').value = S.leaseStart;
+  document.getElementById('set-end').value   = S.leaseEnd;
+  document.getElementById('set-bf').value    = BF();
+  document.getElementById('set-gf').value    = GF();
+  showModal('settingsOverlay');
+}
+function saveSettings() {
+  S.leaseStart = document.getElementById('set-start').value || S.leaseStart;
+  S.leaseEnd   = document.getElementById('set-end').value   || S.leaseEnd;
+  S.bfName     = document.getElementById('set-bf').value.trim() || '男友';
+  S.gfName     = document.getElementById('set-gf').value.trim() || '女友';
+  localStorage.setItem('rz-settings-v1', JSON.stringify(S));
+  hideModal('settingsOverlay');
+  syncToCloud();
+  render();
+  toast('✅ 設定已儲存');
+}
+
+// ─── Expenses ─────────────────────────────────────────────
+let EX = [];
+let CUR_FILTER = 'all';
+let EDIT_ID = null;
+let M = { paid:false, resp:'split', payer:'split' };
+
+const CAT_ORDER = ['一次性費用','房租','管理費','網路費','其他'];
+const CAT_EMO   = { '一次性費用':'📦','房租':'🏠','管理費':'🏢','網路費':'🌐','其他':'📝' };
+const RESP_LBL  = r => ({boyfriend:`👨 ${BF()}出`,girlfriend:`👩 ${GF()}出`,split:'🤝 均分'}[r]||r);
+const uid = () => 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+
+function buildDefault() {
+  const d=[
+    {id:'e1', category:'一次性費用',name:'中介費',              amount:11500,dueDate:null,        responsibility:'split',    paidBy:'split',    isPaid:true, note:''},
+    {id:'e2', category:'一次性費用',name:'公證費',              amount:2500, dueDate:null,        responsibility:'split',    paidBy:'split',    isPaid:true, note:''},
+    {id:'e3', category:'一次性費用',name:'房租押金',            amount:46000,dueDate:null,        responsibility:'split',    paidBy:'split',    isPaid:true, note:''},
+    {id:'e4', category:'一次性費用',name:'機車位押金',          amount:1000, dueDate:null,        responsibility:'split',    paidBy:'split',    isPaid:true, note:''},
+    {id:'e5', category:'一次性費用',name:'機車位租金',          amount:6000, dueDate:null,        responsibility:'split',    paidBy:'split',    isPaid:true, note:''},
+    {id:'e6', category:'一次性費用',name:'除濕機＋空氣清淨機', amount:22597,dueDate:null,        responsibility:'boyfriend',paidBy:'boyfriend',isPaid:true, note:'男友出'},
+    {id:'e7', category:'一次性費用',name:'衣櫃清運',            amount:3000, dueDate:null,        responsibility:'split',    paidBy:'split',    isPaid:true, note:''},
+    {id:'e8', category:'一次性費用',name:'房屋清潔',            amount:2600, dueDate:null,        responsibility:'split',    paidBy:'split',    isPaid:false,note:''},
+    {id:'r1', category:'房租',name:'房租 2026年（第一年）',     amount:552000,dueDate:'2026-07-01',responsibility:'split',   paidBy:'split',    isPaid:true, note:'每年7月繳'},
+    {id:'r2', category:'房租',name:'房租 2027年（第二年）',     amount:552000,dueDate:'2027-07-01',responsibility:'split',   paidBy:'split',    isPaid:false,note:'每年7月繳'},
+  ];
+  const mg=[
+    ['2026','07',true],['2026','08',false],['2026','09',false],['2026','10',false],['2026','11',false],['2026','12',false],
+    ['2027','01',false],['2027','02',false],['2027','03',false],['2027','04',false],['2027','05',false],['2027','06',false],
+    ['2027','07',false],['2027','08',false],['2027','09',false],['2027','10',false],['2027','11',false],['2027','12',false],
+    ['2028','01',false],['2028','02',false],['2028','03',false],['2028','04',false],['2028','05',false],['2028','06',false],
+  ];
+  mg.forEach(([y,m,p],i)=>d.push({id:`mg${i+1}`,category:'管理費',name:`管理費 ${y}年${m}月`,amount:970,dueDate:`${y}-${m}-01`,responsibility:'split',paidBy:'split',isPaid:p,note:'每月1號繳'}));
+  const nt=[
+    {l:'2026 Q3',dt:'2026-07-01',p:true, pb:'boyfriend'},
+    {l:'2026 Q4',dt:'2026-10-01',p:false,pb:'split'},
+    {l:'2027 Q1',dt:'2027-01-01',p:false,pb:'split'},
+    {l:'2027 Q2',dt:'2027-04-01',p:false,pb:'split'},
+    {l:'2027 Q3',dt:'2027-07-01',p:false,pb:'split'},
+    {l:'2027 Q4',dt:'2027-10-01',p:false,pb:'split'},
+    {l:'2028 Q1',dt:'2028-01-01',p:false,pb:'split'},
+  ];
+  nt.forEach((q,i)=>d.push({id:`nt${i+1}`,category:'網路費',name:`網路費 ${q.l}`,amount:2997,dueDate:q.dt,responsibility:'split',paidBy:q.pb,isPaid:q.p,note:'季繳'}));
+  return d;
+}
+
+function loadEx() {
+  try {
+    const r=localStorage.getItem('rz-expenses-v3');
+    if(r){ EX=JSON.parse(r); EX.forEach(e=>{if(!e.responsibility)e.responsibility=e.paidBy||'split';}); }
+    else EX=buildDefault();
+  } catch { EX=buildDefault(); }
+}
+function saveEx()  { syncToCloud(); }
+
+// ─── Payments ─────────────────────────────────────────────
+let PAY = []; // {id,date,from,to,amount,note}  from/to: 'boyfriend'|'girlfriend'|'even'
+let PAY_DIR = 'gftobf'; // current payment modal direction
+
+function loadPay() {
+  try { PAY=JSON.parse(localStorage.getItem('rz-payments-v1')||'[]'); } catch { PAY=[]; }
+}
+function savePay() { syncToCloud(); }
+
+// ─── Calc ─────────────────────────────────────────────────
+function calc() {
+  let totalPaid=0,totalPending=0,bfCash=0,gfCash=0,bfShare=0,gfShare=0;
+  for(const e of EX){
+    const r=e.responsibility||'split';
+    if(e.isPaid){
+      totalPaid+=e.amount;
+      if(e.paidBy==='boyfriend')       bfCash+=e.amount;
+      else if(e.paidBy==='girlfriend') gfCash+=e.amount;
+      else                            {bfCash+=e.amount/2;gfCash+=e.amount/2;}
+      if(r==='boyfriend')              bfShare+=e.amount;
+      else if(r==='girlfriend')        gfShare+=e.amount;
+      else                            {bfShare+=e.amount/2;gfShare+=e.amount/2;}
+    } else { totalPending+=e.amount; }
+  }
+  const rawBal = bfCash - bfShare; // >0: gf owes bf; <0: bf owes gf
+
+  // Apply payments
+  let settled = 0;
+  for(const p of PAY){
+    if(p.from==='girlfriend' && p.to==='boyfriend') settled += p.amount;   // gf pays bf → reduces debt
+    else if(p.from==='boyfriend' && p.to==='girlfriend') settled -= p.amount; // bf pays gf → increases debt (gf owed less)
+    else if(p.from==='even') settled = rawBal; // mark as settled
+  }
+  const netBal = rawBal - settled;
+
+  return { totalPaid,totalPending,bfCash,gfCash,bfShare,gfShare,rawBal,netBal,settled };
+}
+
+function nextDue(n=5){
+  const t=new Date();t.setHours(0,0,0,0);
+  return EX.filter(e=>!e.isPaid&&e.dueDate)
+    .map(e=>({...e,_d:new Date(e.dueDate+'T00:00:00')}))
+    .sort((a,b)=>a._d-b._d).slice(0,n);
+}
+function overdue(e){ if(e.isPaid||!e.dueDate)return false; const t=new Date();t.setHours(0,0,0,0); return new Date(e.dueDate+'T00:00:00')<t; }
+
+// ─── Format ───────────────────────────────────────────────
+const fm = n => '$'+Math.round(n).toLocaleString('zh-TW');
+function fd(d){if(!d)return'';const dt=new Date(d+'T00:00:00');return`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()}`;}
+function fms(d){if(!d)return'';const dt=new Date(d+'T00:00:00');return`${dt.getFullYear()}年${dt.getMonth()+1}月`;}
+
+// ─── Render ───────────────────────────────────────────────
+function render() {
+  renderStats();
+  renderPaymentList();
+  renderNextDue();
+  renderGroups();
+  updateModalLabels();
+}
+
+function renderStats() {
+  const c=calc();
+  // Lease progress
+  const ls=new Date(S.leaseStart+'T00:00:00'), le=new Date(S.leaseEnd+'T00:00:00');
+  const pct=Math.max(0,Math.min(100,(new Date()-ls)/(le-ls)*100));
+  document.getElementById('progressFill').style.width=pct.toFixed(1)+'%';
+  document.getElementById('pLabelPct').textContent=pct.toFixed(0)+'%';
+  document.getElementById('pLabelStart').textContent=`${ls.getFullYear()}/${ls.getMonth()+1}`;
+  document.getElementById('pLabelEnd').textContent=`${le.getFullYear()}/${le.getMonth()+1}`;
+  document.getElementById('headerSub').textContent=`租約期間：${fms(S.leaseStart)} — ${fms(S.leaseEnd)}`;
+
+  // Cards
+  document.getElementById('totalPaid').textContent=fm(c.totalPaid);
+  document.getElementById('totalPending').textContent=fm(c.totalPending);
+  document.getElementById('bfCardName').textContent=`👨 ${BF()}`;
+  document.getElementById('gfCardName').textContent=`👩 ${GF()}`;
+  document.getElementById('bfShare').textContent=fm(c.bfShare);
+  document.getElementById('gfShare').textContent=fm(c.gfShare);
+  document.getElementById('bfCash').textContent=fm(c.bfCash);
+  document.getElementById('gfCash').textContent=fm(c.gfCash);
+  setDiff('bfDiff', c.bfCash-c.bfShare);
+  setDiff('gfDiff', c.gfCash-c.gfShare);
+
+  // Balance
+  const bv=document.getElementById('balanceValue');
+  const si=document.getElementById('settledInfo');
+  const bi=document.getElementById('balanceIcon');
+  const net=c.netBal;
+
+  if(Math.abs(net)<1){
+    bi.textContent='✅';
+    bv.className='balance-value settled';
+    bv.textContent='兩人費用已平衡，打平了！';
+  } else if(net>0){
+    bi.textContent='↔️';
+    bv.className='balance-value gf-owes';
+    bv.textContent=`${GF()} 需補給 ${BF()} ${fm(net)}`;
+  } else {
+    bi.textContent='↔️';
+    bv.className='balance-value bf-owes';
+    bv.textContent=`${BF()} 需補給 ${GF()} ${fm(-net)}`;
+  }
+  if(PAY.length>0 && Math.abs(c.rawBal)>0.5){
+    si.classList.remove('hidden');
+    si.textContent=`原始欠款 ${fm(Math.abs(c.rawBal))}，已還 ${fm(Math.abs(c.settled))}`;
+  } else { si.classList.add('hidden'); }
+}
+
+function setDiff(id, diff) {
+  const el=document.getElementById(id);
+  if(Math.abs(diff)<1){ el.className='pc-diff even'; el.textContent='已平衡'; }
+  else if(diff>0){ el.className='pc-diff over';  el.textContent=`多付了 ${fm(diff)}`; }
+  else           { el.className='pc-diff under'; el.textContent=`少付了 ${fm(-diff)}`; }
+}
+
+function renderPaymentList() {
+  const pl=document.getElementById('paymentList');
+  if(!PAY.length){ pl.classList.add('hidden'); return; }
+  pl.classList.remove('hidden');
+  pl.innerHTML='';
+  [...PAY].reverse().forEach(p=>{
+    const row=document.createElement('div');
+    row.className='payment-item';
+    let who='', amt=fm(p.amount);
+    if(p.from==='girlfriend') who=`${GF()} → ${BF()}`;
+    else if(p.from==='boyfriend') who=`${BF()} → ${GF()}`;
+    else who='雙方結清';
+    row.innerHTML=`
+      <div class="payment-icon">💸</div>
+      <div class="payment-desc">
+        <div class="payment-who">${who}</div>
+        <div class="payment-meta">${fd(p.date)}${p.note?' · '+p.note:''}</div>
+      </div>
+      <div class="payment-amt">${p.from==='even'?'結清':amt}</div>
+      <button class="payment-del" onclick="deletePayment('${p.id}')" title="刪除">✕</button>
+    `;
+    pl.appendChild(row);
+  });
+}
+
+function renderNextDue() {
+  const items=nextDue(6);
+  const sec=document.getElementById('nextDueSection');
+  const tbl=document.getElementById('nextDueTable');
+  if(!items.length){ sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
+  tbl.innerHTML='';
+  items.forEach(e=>{
+    const over=overdue(e);
+    const row=document.createElement('div');
+    row.className='next-due-row';
+    row.onclick=()=>openEditModal(e.id);
+    row.innerHTML=`
+      <div class="ndr-name">${e.name}</div>
+      <div class="ndr-date">${fd(e.dueDate)} · ${fm(e.amount)}</div>
+      <div class="ndr-status ${over?'overdue':'upcoming'}">${over?'逾期':'即將到期'}</div>
+    `;
+    tbl.appendChild(row);
+  });
+}
+
+function renderGroups() {
+  const wrap=document.getElementById('groupsWrap');
+  let filtered=EX;
+  if(CUR_FILTER==='pending')  filtered=EX.filter(e=>!e.isPaid);
+  else if(CUR_FILTER==='paid')filtered=EX.filter(e=>e.isPaid);
+  else if(CUR_FILTER==='overdue')filtered=EX.filter(e=>overdue(e));
+  else if(CUR_FILTER!=='all') filtered=EX.filter(e=>e.category===CUR_FILTER);
+
+  const groups={};
+  filtered.forEach(e=>(groups[e.category]=groups[e.category]||[]).push(e));
+  const cats=CAT_ORDER.filter(c=>groups[c]);
+  Object.keys(groups).forEach(c=>{if(!CAT_ORDER.includes(c))cats.push(c);});
+
+  wrap.innerHTML='';
+  if(!cats.length){ wrap.innerHTML='<div class="empty-state"><div class="eicon">🎉</div><p>沒有符合的費用項目</p></div>'; return; }
+
+  cats.forEach(cat=>{
+    const items=groups[cat];
+    const paidCnt=items.filter(e=>e.isPaid).length;
+    const pct=items.length?paidCnt/items.length*100:0;
+    const total=items.reduce((s,e)=>s+e.amount,0);
+    const paid=items.filter(e=>e.isPaid).reduce((s,e)=>s+e.amount,0);
+
+    const g=document.createElement('div');
+    g.className='group';
+    g.innerHTML=`
+      <div class="group-hd">
+        <div class="group-title">${CAT_EMO[cat]||'📌'} ${cat}</div>
+        <div class="group-meta">
+          <span class="group-sum">${fm(paid)} / ${fm(total)}</span>
+          <span class="group-badge">${paidCnt}/${items.length}</span>
+        </div>
+      </div>
+      <div class="group-bar"><div class="group-bar-fill" style="width:${pct.toFixed(0)}%"></div></div>
+    `;
+    const list=document.createElement('div');
+    list.className='exp-list';
+    items.forEach(ex=>{
+      const ov=overdue(ex);
+      const sc=ex.isPaid?'paid':(ov?'overdue':'pending');
+      const resp=ex.responsibility||'split';
+      const item=document.createElement('div');
+      item.className='exp-item'+(ov&&!ex.isPaid?' overdue-row':'');
+
+      const tog=document.createElement('button');
+      tog.className=`tog-btn ${sc}`;
+      tog.textContent=ex.isPaid?'✓':(ov?'!':'○');
+      tog.title=ex.isPaid?'點此標為未繳':'點此標為已繳';
+      tog.onclick=ev=>{ev.stopPropagation();quickToggle(ex.id);};
+
+      const info=document.createElement('div');
+      info.className='exp-info';
+      info.onclick=()=>openEditModal(ex.id);
+      let hint='';
+      if(ex.isPaid&&resp==='split'&&ex.paidBy&&ex.paidBy!=='split'){
+        const who=ex.paidBy==='boyfriend'?BF():GF();
+        hint=`<span class="exp-hint">${who}墊付</span>`;
+      }
+      info.innerHTML=`<div class="exp-name">${ex.name}</div><div class="exp-meta">${ex.dueDate?`<span class="exp-date">${fd(ex.dueDate)}</span>`:''} ${ex.note?`<span class="exp-note">${ex.note}</span>`:''} ${hint}</div>`;
+
+      const rb=document.createElement('span');
+      rb.className=`resp-badge ${resp}`;
+      rb.textContent=RESP_LBL(resp);
+      rb.title='點此切換費用責任';
+      rb.onclick=ev=>{ev.stopPropagation();cycleResp(ex.id);};
+
+      const am=document.createElement('div');
+      am.className=`exp-amt ${sc}`;
+      am.textContent=fm(ex.amount);
+      am.onclick=()=>openEditModal(ex.id);
+
+      item.append(tog,info,rb,am);
+      list.appendChild(item);
+    });
+    g.appendChild(list);
+    wrap.appendChild(g);
+  });
+}
+
+// ─── Quick actions ────────────────────────────────────────
+function quickToggle(id){
+  const e=EX.find(x=>x.id===id);if(!e)return;
+  e.isPaid=!e.isPaid; saveEx(); render();
+  toast(e.isPaid?'✅ 已標為繳費':'↩️ 標為未繳');
+}
+function cycleResp(id){
+  const e=EX.find(x=>x.id===id);if(!e)return;
+  const o=['split','boyfriend','girlfriend'];
+  e.responsibility=o[(o.indexOf(e.responsibility||'split')+1)%o.length];
+  saveEx(); render(); toast(`費用責任：${RESP_LBL(e.responsibility)}`);
+}
+
+// ─── Filter ───────────────────────────────────────────────
+function setFilter(btn,f){
+  CUR_FILTER=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); render();
+}
+
+// ─── Expense Modal ────────────────────────────────────────
+function updateModalLabels(){
+  document.getElementById('resp-bf-lbl').textContent=`${BF()}出`;
+  document.getElementById('resp-gf-lbl').textContent=`${GF()}出`;
+  document.getElementById('paid-bf-lbl').textContent=`${BF()}付`;
+  document.getElementById('paid-gf-lbl').textContent=`${GF()}付`;
+}
+function openAddModal(){
+  EDIT_ID=null; M={paid:false,resp:'split',payer:'split'};
+  document.getElementById('modalTitle').textContent='新增費用';
+  ['inp-name','inp-note'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('inp-amount').value='';
+  document.getElementById('inp-category').value='一次性費用';
+  document.getElementById('inp-date').value='';
+  document.getElementById('deleteBtn').classList.add('hidden');
+  syncMUI(); showModal('expenseOverlay');
+  setTimeout(()=>document.getElementById('inp-name').focus(),100);
+}
+function openEditModal(id){
+  const e=EX.find(x=>x.id===id);if(!e)return;
+  EDIT_ID=id; M={paid:e.isPaid,resp:e.responsibility||'split',payer:e.paidBy||'split'};
+  document.getElementById('modalTitle').textContent='編輯費用';
+  document.getElementById('inp-name').value=e.name;
+  document.getElementById('inp-amount').value=e.amount;
+  document.getElementById('inp-category').value=e.category;
+  document.getElementById('inp-date').value=e.dueDate||'';
+  document.getElementById('inp-note').value=e.note||'';
+  document.getElementById('deleteBtn').classList.remove('hidden');
+  syncMUI(); showModal('expenseOverlay');
+}
+function togglePaid(){ M.paid=!M.paid; syncMUI(); }
+function selResp(v) { M.resp=v;  syncMUI(); }
+function selPayer(v){ M.payer=v; syncMUI(); }
+function syncMUI(){
+  const row=document.getElementById('paidRow'),sw=document.getElementById('paidSw');
+  row.classList.toggle('on',M.paid); sw.classList.toggle('on',M.paid);
+  document.getElementById('paidLbl').textContent=M.paid?'✅ 已繳費':'⏳ 尚未繳費';
+  const rm={boyfriend:'opt-resp-bf',girlfriend:'opt-resp-gf',split:'opt-resp-split'};
+  const rc={boyfriend:'sel-bf',girlfriend:'sel-gf',split:'sel-split'};
+  Object.values(rm).forEach(i=>document.getElementById(i).className='trio-opt');
+  if(rm[M.resp]) document.getElementById(rm[M.resp]).classList.add(rc[M.resp]);
+  const pm={boyfriend:'opt-paid-bf',girlfriend:'opt-paid-gf',split:'opt-paid-split'};
+  Object.values(pm).forEach(i=>document.getElementById(i).className='trio-opt');
+  if(pm[M.payer]) document.getElementById(pm[M.payer]).classList.add(rc[M.payer]);
+}
+function saveExpense(){
+  const name=document.getElementById('inp-name').value.trim();
+  const amt=parseFloat(document.getElementById('inp-amount').value);
+  const cat=document.getElementById('inp-category').value;
+  const date=document.getElementById('inp-date').value||null;
+  const note=document.getElementById('inp-note').value.trim();
+  if(!name){ toast('⚠️ 請填寫費用名稱'); return; }
+  if(isNaN(amt)||amt<0){ toast('⚠️ 請填寫正確金額'); return; }
+  if(EDIT_ID){
+    const i=EX.findIndex(e=>e.id===EDIT_ID);
+    if(i!==-1) EX[i]={...EX[i],name,amount:amt,category:cat,dueDate:date,responsibility:M.resp,paidBy:M.payer,isPaid:M.paid,note};
+  } else {
+    EX.push({id:uid(),category:cat,name,amount:amt,dueDate:date,responsibility:M.resp,paidBy:M.payer,isPaid:M.paid,note});
+  }
+  saveEx(); render(); hideModal('expenseOverlay');
+  toast(EDIT_ID?'✅ 已更新':'✅ 已新增');
+}
+function confirmDelete(){
+  if(!EDIT_ID)return;
+  const e=EX.find(x=>x.id===EDIT_ID);
+  if(!e||!confirm(`確定要刪除「${e.name}」嗎？`))return;
+  EX=EX.filter(x=>x.id!==EDIT_ID);
+  saveEx(); render(); hideModal('expenseOverlay'); toast('🗑 已刪除');
+}
+
+// ─── Payment Modal ────────────────────────────────────────
+function openPaymentModal(){
+  const c=calc();
+  // auto-suggest direction based on balance
+  if(c.rawBal>0) PAY_DIR='gftobf';      // gf owes bf
+  else if(c.rawBal<0) PAY_DIR='bftogf'; // bf owes gf
+  else PAY_DIR='even';
+
+  document.getElementById('pay-amount').value='';
+  document.getElementById('pay-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('pay-note').value='';
+
+  // Update direction labels
+  document.getElementById('payDir-gftobf').textContent=`${GF()}→${BF()}`;
+  document.getElementById('payDir-bftogf').textContent=`${BF()}→${GF()}`;
+
+  // Hint
+  const hint=document.getElementById('paymentHint');
+  if(Math.abs(c.netBal)<1) hint.textContent='目前已平衡，也可記錄還款歷史。';
+  else if(c.netBal>0) hint.innerHTML=`目前 <strong>${GF()}</strong> 欠 <strong>${BF()}</strong> <strong style="color:var(--gf)">${fm(c.netBal)}</strong>，請選擇還款方向與金額。`;
+  else hint.innerHTML=`目前 <strong>${BF()}</strong> 欠 <strong>${GF()}</strong> <strong style="color:var(--bf)">${fm(-c.netBal)}</strong>，請選擇還款方向與金額。`;
+
+  syncPayDir(); showModal('paymentOverlay');
+}
+function selPayDir(d){ PAY_DIR=d; syncPayDir(); }
+function syncPayDir(){
+  ['opt-pay-gftobf','opt-pay-bftogf','opt-pay-even'].forEach(id=>document.getElementById(id).className='trio-opt');
+  const cls={gftobf:'sel-gf',bftogf:'sel-bf',even:'sel-split'};
+  if(cls[PAY_DIR]) document.getElementById('opt-pay-'+PAY_DIR).classList.add(cls[PAY_DIR]);
+  const amtEl=document.getElementById('pay-amount').parentElement;
+  document.getElementById('pay-amount').closest('.fgrp').style.display=PAY_DIR==='even'?'none':'block';
+}
+function savePayment(){
+  const amt=parseFloat(document.getElementById('pay-amount').value);
+  const date=document.getElementById('pay-date').value||new Date().toISOString().split('T')[0];
+  const note=document.getElementById('pay-note').value.trim();
+  if(PAY_DIR!=='even'&&(isNaN(amt)||amt<=0)){ toast('⚠️ 請填寫還款金額'); return; }
+  const entry={id:'p_'+Date.now(), date, note};
+  if(PAY_DIR==='gftobf')     { entry.from='girlfriend'; entry.to='boyfriend'; entry.amount=amt; }
+  else if(PAY_DIR==='bftogf'){ entry.from='boyfriend';  entry.to='girlfriend'; entry.amount=amt; }
+  else { entry.from='even'; entry.to='even'; entry.amount=0; }
+  PAY.push(entry); savePay(); render(); hideModal('paymentOverlay');
+  toast('💸 還款記錄已新增');
+}
+function deletePayment(id){
+  if(!confirm('確定刪除這筆還款記錄？'))return;
+  PAY=PAY.filter(p=>p.id!==id); savePay(); render(); toast('🗑 已刪除');
+}
+
+// ─── Modal helpers ────────────────────────────────────────
+function showModal(id){ document.getElementById(id).classList.remove('hidden'); }
+function hideModal(id){ document.getElementById(id).classList.add('hidden'); if(id==='expenseOverlay')EDIT_ID=null; }
+function overlayClose(ev,id){ if(ev.target===document.getElementById(id))hideModal(id); }
+
+// ─── Export / Import ──────────────────────────────────────
+function exportData(){
+  const blob=new Blob([JSON.stringify({version:4,exportedAt:new Date().toISOString(),settings:S,expenses:EX,payments:PAY},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`中山綺麗費用-${new Date().toISOString().split('T')[0]}.json`; a.click();
+  URL.revokeObjectURL(url); toast('📤 匯出成功');
+}
+function importData(ev){
+  const file=ev.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      const arr=Array.isArray(d)?d:(d.expenses||null);
+      if(!Array.isArray(arr))throw new Error();
+      arr.forEach(x=>{if(!x.responsibility)x.responsibility=x.paidBy||'split';});
+      EX=arr;
+      if(d.payments&&Array.isArray(d.payments))PAY=d.payments;
+      if(d.settings){S={...S,...d.settings};localStorage.setItem('rz-settings-v1',JSON.stringify(S));}
+      syncToCloud(); render(); toast('📥 匯入成功！');
+    } catch{ toast('⚠️ 匯入失敗，請確認檔案格式'); }
+  };
+  r.readAsText(file); ev.target.value='';
+}
+
+// ─── Toast ────────────────────────────────────────────────
+let _tt=null;
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ─── Keyboard ─────────────────────────────────────────────
+document.addEventListener('keydown',ev=>{
+  const tag=document.activeElement.tagName;
+  if(ev.key==='Escape')['expenseOverlay','paymentOverlay','settingsOverlay','shareOverlay'].forEach(i=>hideModal(i));
+  if(ev.key==='n'&&!['INPUT','TEXTAREA','SELECT'].includes(tag))openAddModal();
+  if(ev.key===','&&!['INPUT','TEXTAREA','SELECT'].includes(tag))openSettings();
+});
+
+// ─── Init ─────────────────────────────────────────────────
+loadS();        // 先從 localStorage 讀設定（速度快）
+startListener(); // 再啟動 Firestore 即時監聽（會觸發 render）
+</script>
+</body>
+</html>
