@@ -285,7 +285,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft Jheng
         <div class="balance-value" id="balanceValue">計算中...</div>
         <div class="balance-settled hidden" id="settledInfo"></div>
       </div>
-      <button class="add-payment-btn" onclick="openPaymentModal()">＋ 還款記錄</button>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+        <button class="add-payment-btn" onclick="openPaymentModal()">＋ 還款記錄</button>
+        <button class="add-payment-btn" onclick="copyPaymentInfo()" style="border-color:var(--muted);background:var(--border-light);color:var(--muted)">📋 複製金額</button>
+      </div>
     </div>
     <div class="payment-list hidden" id="paymentList"></div>
   </div>
@@ -305,6 +308,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft Jheng
     <button class="filter-btn" onclick="setFilter(this,'房租')">🏠 房租</button>
     <button class="filter-btn" onclick="setFilter(this,'管理費')">🏢 管理費</button>
     <button class="filter-btn" onclick="setFilter(this,'網路費')">🌐 網路費</button>
+    <button class="filter-btn" onclick="setFilter(this,'水電')">💡 水電</button>
+    <button class="filter-btn" onclick="setFilter(this,'日用品')">🛒 日用品</button>
     <button class="filter-btn" onclick="setFilter(this,'pending')">⏳ 待繳</button>
     <button class="filter-btn" onclick="setFilter(this,'overdue')">🚨 逾期</button>
     <button class="filter-btn" onclick="setFilter(this,'paid')">✅ 已繳</button>
@@ -343,6 +348,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft Jheng
         <option value="房租">🏠 房租</option>
         <option value="管理費">🏢 管理費</option>
         <option value="網路費">🌐 網路費</option>
+        <option value="水電">💡 水電</option>
+        <option value="日用品">🛒 日用品</option>
         <option value="其他">📝 其他</option>
       </select>
     </div>
@@ -410,6 +417,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft Jheng
       <div class="fgrp"><label class="flbl">👨 男方名稱</label><input type="text" class="finput" id="set-bf" placeholder="男友" maxlength="10"></div>
       <div class="fgrp"><label class="flbl">👩 女方名稱</label><input type="text" class="finput" id="set-gf" placeholder="女友" maxlength="10"></div>
     </div>
+    <div class="sec-title">🔔 到期提醒通知</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="flex:1;font-size:.78rem;color:var(--muted);line-height:1.6">開啟後，每次進入 App 時若有 7 天內到期費用，會自動發出通知。</div>
+      <button class="btn btn-secondary" id="notifBtn" onclick="requestNotifPermission()" style="white-space:nowrap;flex-shrink:0">🔔 啟用通知</button>
+    </div>
     <div class="mactions">
       <button class="btn btn-secondary" onclick="hideModal('settingsOverlay')">取消</button>
       <button class="btn btn-primary" onclick="saveSettings()">儲存設定</button>
@@ -476,16 +488,17 @@ function startListener() {
       EX.forEach(e => { if (!e.responsibility) e.responsibility = e.paidBy || 'split'; });
       setSyncStatus('ok');
     } else {
-      // 首次啟動：寫入預設資料
       EX  = buildDefault();
       PAY = [];
       syncToCloud();
     }
     render();
+    checkDueNotifs();
   }, err => {
     console.error('Firestore:', err);
     setSyncStatus('error');
-    loadEx(); loadPay(); render(); // 降級用本機
+    loadEx(); loadPay(); render();
+    checkDueNotifs();
   });
 }
 
@@ -502,6 +515,16 @@ function openSettings() {
   document.getElementById('set-end').value   = S.leaseEnd;
   document.getElementById('set-bf').value    = BF();
   document.getElementById('set-gf').value    = GF();
+  const btn = document.getElementById('notifBtn');
+  if (!('Notification' in window)) {
+    btn.textContent = '不支援'; btn.disabled = true;
+  } else if (Notification.permission === 'granted') {
+    btn.textContent = '✅ 已啟用'; btn.style.background = 'var(--success-lt)'; btn.style.color = 'var(--success)'; btn.disabled = false;
+  } else if (Notification.permission === 'denied') {
+    btn.textContent = '❌ 已被拒絕（請至瀏覽器設定開啟）'; btn.disabled = true;
+  } else {
+    btn.textContent = '🔔 啟用通知'; btn.style.background = ''; btn.style.color = ''; btn.disabled = false;
+  }
   showModal('settingsOverlay');
 }
 function saveSettings() {
@@ -522,8 +545,8 @@ let CUR_FILTER = 'all';
 let EDIT_ID = null;
 let M = { paid:false, resp:'split', payer:'split' };
 
-const CAT_ORDER = ['一次性費用','房租','管理費','網路費','其他'];
-const CAT_EMO   = { '一次性費用':'📦','房租':'🏠','管理費':'🏢','網路費':'🌐','其他':'📝' };
+const CAT_ORDER = ['一次性費用','房租','管理費','網路費','水電','日用品','其他'];
+const CAT_EMO   = { '一次性費用':'📦','房租':'🏠','管理費':'🏢','網路費':'🌐','水電':'💡','日用品':'🛒','其他':'📝' };
 const RESP_LBL  = r => ({boyfriend:`👨 ${BF()}出`,girlfriend:`👩 ${GF()}出`,split:'🤝 均分'}[r]||r);
 const uid = () => 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
 
@@ -976,6 +999,58 @@ function importData(ev){
     } catch{ toast('⚠️ 匯入失敗，請確認檔案格式'); }
   };
   r.readAsText(file); ev.target.value='';
+}
+
+// ─── Notifications ────────────────────────────────────────
+let _notifSent = false;
+function requestNotifPermission() {
+  if (!('Notification' in window)) { toast('⚠️ 此裝置不支援通知功能'); return; }
+  if (Notification.permission === 'granted') { toast('✅ 通知已啟用'); checkDueNotifs(); return; }
+  if (Notification.permission === 'denied') { toast('❌ 請在瀏覽器設定中手動開啟通知'); return; }
+  Notification.requestPermission().then(p => {
+    const btn = document.getElementById('notifBtn');
+    if (p === 'granted') {
+      toast('🔔 通知已啟用！');
+      checkDueNotifs();
+      if (btn) { btn.textContent='✅ 已啟用'; btn.style.background='var(--success-lt)'; btn.style.color='var(--success)'; btn.disabled=false; }
+    } else {
+      toast('❌ 通知權限未開啟');
+      if (btn) { btn.textContent='❌ 已被拒絕'; btn.disabled=true; }
+    }
+  });
+}
+function checkDueNotifs() {
+  if (_notifSent) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const soon  = new Date(today); soon.setDate(soon.getDate()+7);
+  const due = EX.filter(e => !e.isPaid && e.dueDate && new Date(e.dueDate+'T00:00:00') <= soon);
+  if (!due.length) return;
+  _notifSent = true;
+  try {
+    new Notification('🏠 中山綺麗費用提醒', {
+      body: `有 ${due.length} 筆費用即將到期：${due.map(e=>e.name).join('、')}`,
+      tag: 'rental-due'
+    });
+  } catch(err) { console.warn('Notification error:', err); }
+}
+
+// ─── Copy Payment Info ────────────────────────────────────
+function copyPaymentInfo() {
+  const c = calc();
+  const net = c.netBal;
+  const today = new Date().toLocaleDateString('zh-TW');
+  let msg;
+  if (Math.abs(net) < 1) {
+    msg = `🏠 中山綺麗費用（${today}）\n目前兩人費用已平衡！`;
+  } else if (net > 0) {
+    msg = `🏠 中山綺麗費用（${today}）\n${GF()} 需轉帳給 ${BF()}：${fm(net)}`;
+  } else {
+    msg = `🏠 中山綺麗費用（${today}）\n${BF()} 需轉帳給 ${GF()}：${fm(-net)}`;
+  }
+  navigator.clipboard.writeText(msg)
+    .then(() => toast('📋 已複製，可貼到 LINE 傳給對方'))
+    .catch(() => toast('⚠️ 複製失敗，請手動複製'));
 }
 
 // ─── Toast ────────────────────────────────────────────────
