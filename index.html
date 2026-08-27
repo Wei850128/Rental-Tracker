@@ -310,6 +310,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft Jheng
     <button class="filter-btn" onclick="setFilter(this,'網路費')">🌐 網路費</button>
     <button class="filter-btn" onclick="setFilter(this,'水電')">💡 水電</button>
     <button class="filter-btn" onclick="setFilter(this,'日用品')">🛒 日用品</button>
+    <button class="filter-btn" onclick="setFilter(this,'多比')">🐱 多比</button>
     <button class="filter-btn" onclick="setFilter(this,'pending')">⏳ 待繳</button>
     <button class="filter-btn" onclick="setFilter(this,'overdue')">🚨 逾期</button>
     <button class="filter-btn" onclick="setFilter(this,'paid')">✅ 已繳</button>
@@ -350,6 +351,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft Jheng
         <option value="網路費">🌐 網路費</option>
         <option value="水電">💡 水電</option>
         <option value="日用品">🛒 日用品</option>
+        <option value="多比">🐱 多比</option>
         <option value="其他">📝 其他</option>
       </select>
     </div>
@@ -545,8 +547,8 @@ let CUR_FILTER = 'all';
 let EDIT_ID = null;
 let M = { paid:false, resp:'split', payer:'split' };
 
-const CAT_ORDER = ['一次性費用','房租','管理費','網路費','水電','日用品','其他'];
-const CAT_EMO   = { '一次性費用':'📦','房租':'🏠','管理費':'🏢','網路費':'🌐','水電':'💡','日用品':'🛒','其他':'📝' };
+const CAT_ORDER = ['一次性費用','房租','管理費','網路費','水電','日用品','多比','其他'];
+const CAT_EMO   = { '一次性費用':'📦','房租':'🏠','管理費':'🏢','網路費':'🌐','水電':'💡','日用品':'🛒','多比':'🐱','其他':'📝' };
 const RESP_LBL  = r => ({boyfriend:`👨 ${BF()}出`,girlfriend:`👩 ${GF()}出`,split:'🤝 均分'}[r]||r);
 const uid = () => 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
 
